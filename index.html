@@ -5,7 +5,7 @@
     <title>🌍 Smart AI Translator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* ===== Page Background Animation ===== */
+        /* ===== Background gradient animation ===== */
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #fad0c4, #ffd1ff, #c2e9fb, #d4fc79, #96e6a1, #fddb92);
@@ -17,15 +17,13 @@
             min-height: 100vh;
             margin: 0;
         }
-
-        /* ===== Background animation keyframes ===== */
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        /* ===== Main container box ===== */
+        /* ===== Main box styling ===== */
         .container {
             background-color: #fff7e6;
             padding: 20px;
@@ -33,65 +31,55 @@
             box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 600px;
-            text-align: center; /* Center all text inside container */
         }
 
-        /* ===== Form elements styling ===== */
-        textarea, select, input, button {
+        /* Center only the title */
+        .container h1 {
+            text-align: center;
+        }
+
+        textarea, select, button {
             width: 100%;
             padding: 10px;
             margin-top: 8px;
             font-size: 16px;
         }
 
-        /* Make dropdown taller */
-        select {
-            height: 150px;
-        }
-
-        /* Button styles */
         button {
             background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
         }
-
         button:hover { background-color: #45a049; }
 
-        /* Result box styling */
         .result {
             background-color: #f9f9f9;
             padding: 10px;
             margin-top: 15px;
             border-radius: 5px;
-            text-align: left; /* Keep translated text aligned left */
         }
     </style>
+    <!-- jQuery for searchable dropdown -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
 <div class="container">
-    <!-- ===== Title ===== -->
     <h1>🌍 Smart AI Translator 🌍</h1>
 
-    <!-- ===== Input text area ===== -->
     <label>Enter text:</label>
     <textarea id="text" rows="4" placeholder="Type something..."></textarea>
 
-    <!-- ===== Input language search & dropdown ===== -->
-    <label>Search input language:</label>
-    <input type="text" id="input_search" placeholder="Search input language...">
-    <select id="input_lang" size="6"></select>
+    <label>Select input language:</label>
+    <select id="input_lang"></select>
 
-    <!-- ===== Target language search & dropdown ===== -->
-    <label>Search target language:</label>
-    <input type="text" id="target_search" placeholder="Search target language...">
-    <select id="target_lang" size="6"></select>
+    <label>Select target language:</label>
+    <select id="target_lang"></select>
 
-    <!-- ===== Translate button ===== -->
     <button onclick="translateText()">Translate</button>
 
-    <!-- ===== Output area (hidden initially) ===== -->
     <div class="result" id="result_box" style="display:none;">
         <h3>Original Text:</h3>
         <p id="original_output"></p>
@@ -102,13 +90,10 @@
 </div>
 
 <script>
-/* ===== Backend API URL ===== */
 const backendURL = "https://ai-translator-737k.onrender.com"; 
-
-/* Store all languages here */
 let allLanguages = {};
 
-/* ===== Fetch languages from backend ===== */
+// Fetch languages and populate dropdowns
 fetch(`${backendURL}/languages`)
     .then(res => res.json())
     .then(languages => {
@@ -116,12 +101,16 @@ fetch(`${backendURL}/languages`)
         populateSelect("input_lang", languages);
         populateSelect("target_lang", languages);
 
-        // Set default selection (English → Bengali)
-        document.getElementById("input_lang").value = "en";
-        document.getElementById("target_lang").value = "bn";
+        // Apply Select2 for searchable dropdown
+        $('#input_lang').select2();
+        $('#target_lang').select2();
+
+        // Default values
+        $('#input_lang').val("en").trigger("change");
+        $('#target_lang').val("bn").trigger("change");
     });
 
-/* ===== Populate dropdown options ===== */
+// Populate dropdown function
 function populateSelect(selectId, languages) {
     const select = document.getElementById(selectId);
     select.innerHTML = "";
@@ -131,29 +120,7 @@ function populateSelect(selectId, languages) {
     }
 }
 
-/* ===== Search filter for input language ===== */
-document.getElementById("input_search").addEventListener("keyup", function() {
-    const term = this.value.toLowerCase();
-    const filtered = Object.fromEntries(
-        Object.entries(allLanguages).filter(([name]) =>
-            name.toLowerCase().includes(term)
-        )
-    );
-    populateSelect("input_lang", filtered);
-});
-
-/* ===== Search filter for target language ===== */
-document.getElementById("target_search").addEventListener("keyup", function() {
-    const term = this.value.toLowerCase();
-    const filtered = Object.fromEntries(
-        Object.entries(allLanguages).filter(([name]) =>
-            name.toLowerCase().includes(term)
-        )
-    );
-    populateSelect("target_lang", filtered);
-});
-
-/* ===== Function to send translation request ===== */
+// Translate function
 function translateText() {
     const text = document.getElementById("text").value;
     const inputLang = document.getElementById("input_lang").value;
