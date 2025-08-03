@@ -5,6 +5,7 @@
     <title>🌍 Smart AI Translator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* ===== Page Background Animation ===== */
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #fad0c4, #ffd1ff, #c2e9fb, #d4fc79, #96e6a1, #fddb92);
@@ -16,11 +17,15 @@
             min-height: 100vh;
             margin: 0;
         }
+
+        /* ===== Background animation keyframes ===== */
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+
+        /* ===== Main container box ===== */
         .container {
             background-color: #fff7e6;
             padding: 20px;
@@ -28,43 +33,65 @@
             box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 600px;
+            text-align: center; /* Center all text inside container */
         }
-        textarea, select, button {
+
+        /* ===== Form elements styling ===== */
+        textarea, select, input, button {
             width: 100%;
             padding: 10px;
             margin-top: 8px;
             font-size: 16px;
         }
+
+        /* Make dropdown taller */
+        select {
+            height: 150px;
+        }
+
+        /* Button styles */
         button {
             background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
         }
+
         button:hover { background-color: #45a049; }
+
+        /* Result box styling */
         .result {
             background-color: #f9f9f9;
             padding: 10px;
             margin-top: 15px;
             border-radius: 5px;
+            text-align: left; /* Keep translated text aligned left */
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🌍 Smart AI Translator</h1>
+    <!-- ===== Title ===== -->
+    <h1>🌍 Smart AI Translator 🌍</h1>
 
+    <!-- ===== Input text area ===== -->
     <label>Enter text:</label>
     <textarea id="text" rows="4" placeholder="Type something..."></textarea>
 
-    <label>Select input language:</label>
-    <select id="input_lang"></select>
+    <!-- ===== Input language search & dropdown ===== -->
+    <label>Search input language:</label>
+    <input type="text" id="input_search" placeholder="Search input language...">
+    <select id="input_lang" size="6"></select>
 
-    <label>Select target language:</label>
-    <select id="target_lang"></select>
+    <!-- ===== Target language search & dropdown ===== -->
+    <label>Search target language:</label>
+    <input type="text" id="target_search" placeholder="Search target language...">
+    <select id="target_lang" size="6"></select>
 
+    <!-- ===== Translate button ===== -->
     <button onclick="translateText()">Translate</button>
 
+    <!-- ===== Output area (hidden initially) ===== -->
     <div class="result" id="result_box" style="display:none;">
         <h3>Original Text:</h3>
         <p id="original_output"></p>
@@ -75,35 +102,76 @@
 </div>
 
 <script>
-const backendURL = "https://ai-translator-737k.onrender.com";
- // e.g., https://ai-translator-xxxx.onrender.com
+/* ===== Backend API URL ===== */
+const backendURL = "https://ai-translator-737k.onrender.com"; 
 
-// Fetch languages
+/* Store all languages here */
+let allLanguages = {};
+
+/* ===== Fetch languages from backend ===== */
 fetch(`${backendURL}/languages`)
     .then(res => res.json())
     .then(languages => {
-        const inputSelect = document.getElementById("input_lang");
-        const targetSelect = document.getElementById("target_lang");
-        for (let [name, code] of Object.entries(languages)) {
-            let opt1 = new Option(`${name} (${code})`, code);
-            let opt2 = new Option(`${name} (${code})`, code);
-            inputSelect.add(opt1);
-            targetSelect.add(opt2);
-        }
+        allLanguages = languages;
+        populateSelect("input_lang", languages);
+        populateSelect("target_lang", languages);
+
+        // Set default selection (English → Bengali)
+        document.getElementById("input_lang").value = "en";
+        document.getElementById("target_lang").value = "bn";
     });
 
-// Translate
+/* ===== Populate dropdown options ===== */
+function populateSelect(selectId, languages) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = "";
+    for (let [name, code] of Object.entries(languages)) {
+        let option = new Option(`${name} (${code})`, code);
+        select.add(option);
+    }
+}
+
+/* ===== Search filter for input language ===== */
+document.getElementById("input_search").addEventListener("keyup", function() {
+    const term = this.value.toLowerCase();
+    const filtered = Object.fromEntries(
+        Object.entries(allLanguages).filter(([name]) =>
+            name.toLowerCase().includes(term)
+        )
+    );
+    populateSelect("input_lang", filtered);
+});
+
+/* ===== Search filter for target language ===== */
+document.getElementById("target_search").addEventListener("keyup", function() {
+    const term = this.value.toLowerCase();
+    const filtered = Object.fromEntries(
+        Object.entries(allLanguages).filter(([name]) =>
+            name.toLowerCase().includes(term)
+        )
+    );
+    populateSelect("target_lang", filtered);
+});
+
+/* ===== Function to send translation request ===== */
 function translateText() {
     const text = document.getElementById("text").value;
     const inputLang = document.getElementById("input_lang").value;
     const targetLang = document.getElementById("target_lang").value;
 
-    if (!text) return alert("Please enter text to translate.");
+    if (!text) {
+        alert("Please enter text to translate.");
+        return;
+    }
 
     fetch(`${backendURL}/translate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, input_lang: inputLang, target_lang: targetLang })
+        body: JSON.stringify({
+            text: text,
+            input_lang: inputLang,
+            target_lang: targetLang
+        })
     })
     .then(res => res.json())
     .then(data => {
@@ -111,7 +179,10 @@ function translateText() {
         document.getElementById("translated_output").innerText = data.translated_text;
         document.getElementById("result_box").style.display = "block";
     })
-    .catch(() => alert("Error translating text."));
+    .catch(err => {
+        alert("Error translating text.");
+        console.error(err);
+    });
 }
 </script>
 </body>
