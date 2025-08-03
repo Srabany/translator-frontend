@@ -35,3 +35,13 @@ Open index.html in a browser (for local testing) OR deploy to Vercel.
 Enter text, select input & target languages, click Translate.
 
 The translation will appear instantly.
+
+## 🚀 Live Demo
+🌐 Try it here: https://translator-frontend-ldjz.vercel.app/
+
+## 🔄 Related Repositories
+Backend Repository (Flask API on Render) → https://github.com/Srabany/ai-translator
+
+## 📌 Note:
+You can visit the backend repo to check the API.
+
