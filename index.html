@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>🌍 Smart AI Translator</title>
+    <title>🌍 Smart AI Translator 🌍</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* ===== Background gradient animation ===== */
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #fad0c4, #ffd1ff, #c2e9fb, #d4fc79, #96e6a1, #fddb92);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -22,8 +22,6 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
-        /* ===== Main box styling ===== */
         .container {
             background-color: #fff7e6;
             padding: 20px;
@@ -31,20 +29,20 @@
             box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 600px;
-        }
-
-        /* Center only the title */
-        .container h1 {
             text-align: center;
         }
-
-        textarea, select, button {
-            width: 100%;
+        textarea {
+            width: 95%; /* Reduced width */
             padding: 10px;
             margin-top: 8px;
             font-size: 16px;
         }
-
+        select, button {
+            width: 95%;
+            padding: 10px;
+            margin-top: 8px;
+            font-size: 16px;
+        }
         button {
             background-color: #4CAF50;
             color: white;
@@ -52,18 +50,18 @@
             cursor: pointer;
         }
         button:hover { background-color: #45a049; }
-
         .result {
             background-color: #f9f9f9;
             padding: 10px;
             margin-top: 15px;
             border-radius: 5px;
         }
+        footer {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #555;
+        }
     </style>
-    <!-- jQuery for searchable dropdown -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
 <div class="container">
@@ -87,58 +85,39 @@
         <h3>Translated Text:</h3>
         <p id="translated_output"></p>
     </div>
+
+    <footer>Made with ❤️ by Srabany</footer>
 </div>
 
 <script>
-const backendURL = "https://ai-translator-737k.onrender.com"; 
-let allLanguages = {};
+const backendURL = "https://ai-translator-737k.onrender.com";
 
-// Fetch languages and populate dropdowns
+// Fetch languages
 fetch(`${backendURL}/languages`)
     .then(res => res.json())
     .then(languages => {
-        allLanguages = languages;
-        populateSelect("input_lang", languages);
-        populateSelect("target_lang", languages);
-
-        // Apply Select2 for searchable dropdown
-        $('#input_lang').select2();
-        $('#target_lang').select2();
-
-        // Default values
-        $('#input_lang').val("en").trigger("change");
-        $('#target_lang').val("bn").trigger("change");
+        const inputSelect = document.getElementById("input_lang");
+        const targetSelect = document.getElementById("target_lang");
+        for (let [name, code] of Object.entries(languages)) {
+            let opt1 = new Option(`${name} (${code})`, code);
+            let opt2 = new Option(`${name} (${code})`, code);
+            inputSelect.add(opt1);
+            targetSelect.add(opt2);
+        }
     });
 
-// Populate dropdown function
-function populateSelect(selectId, languages) {
-    const select = document.getElementById(selectId);
-    select.innerHTML = "";
-    for (let [name, code] of Object.entries(languages)) {
-        let option = new Option(`${name} (${code})`, code);
-        select.add(option);
-    }
-}
-
-// Translate function
+// Translate
 function translateText() {
     const text = document.getElementById("text").value;
     const inputLang = document.getElementById("input_lang").value;
     const targetLang = document.getElementById("target_lang").value;
 
-    if (!text) {
-        alert("Please enter text to translate.");
-        return;
-    }
+    if (!text) return alert("Please enter text to translate.");
 
     fetch(`${backendURL}/translate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            text: text,
-            input_lang: inputLang,
-            target_lang: targetLang
-        })
+        body: JSON.stringify({ text, input_lang: inputLang, target_lang: targetLang })
     })
     .then(res => res.json())
     .then(data => {
@@ -146,10 +125,7 @@ function translateText() {
         document.getElementById("translated_output").innerText = data.translated_text;
         document.getElementById("result_box").style.display = "block";
     })
-    .catch(err => {
-        alert("Error translating text.");
-        console.error(err);
-    });
+    .catch(() => alert("Error translating text."));
 }
 </script>
 </body>
