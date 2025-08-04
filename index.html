@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>🌍Smart AI Translator🌍</title>
+    <title>🌍 Smart AI Translator 🌍</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Select2 CSS for searchable dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -34,15 +38,17 @@
         }
 
         h1 {
-            text-align: center; 
+            text-align: center; /* ✅ Only title centered */
         }
 
         textarea, select, button {
-            width: calc(100% - 20px); 
+            width: 95%; /* ✅ Matching textarea & dropdown width */
             padding: 10px;
             margin-top: 8px;
             font-size: 16px;
             display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         button {
@@ -65,14 +71,15 @@
 
         footer {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 20px;
             font-size: 14px;
+            color: #333;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🌍Smart AI Translator🌍</h1>
+    <h1>🌍 Smart AI Translator 🌍</h1>
 
     <label>Enter text:</label>
     <textarea id="text" rows="4" placeholder="Type something..."></textarea>
@@ -94,12 +101,17 @@
     </div>
 </div>
 
+<!-- Footer outside the box -->
 <footer>Made with ❤️ by Srabany</footer>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
 const backendURL = "https://ai-translator-737k.onrender.com";
 
-// Fetch languages
+// Fetch languages and load into dropdowns
 fetch(`${backendURL}/languages`)
     .then(res => res.json())
     .then(languages => {
@@ -111,9 +123,12 @@ fetch(`${backendURL}/languages`)
             inputSelect.add(opt1);
             targetSelect.add(opt2);
         }
+        // ✅ Enable Select2 after adding options
+        $('#input_lang').select2();
+        $('#target_lang').select2();
     });
 
-// Translate
+// Translate function
 function translateText() {
     const text = document.getElementById("text").value;
     const inputLang = document.getElementById("input_lang").value;
